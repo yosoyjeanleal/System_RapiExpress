@@ -13,7 +13,7 @@ use RapiExpress\Interface\IAuthModel;
 class Auth extends Conexion  implements IAuthModel {
 
     private const USERNAME_PATTERN = '/^[a-zA-Z0-9_]{3,20}$/';
-    private const PASSWORD_PATTERN = '/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*#?&]).{8,}$/';
+    private const PASSWORD_PATTERN = '/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};\':"\\|,.<>\/?]).{8,}$/';
 
     /**
      * Valida el formato del nombre de usuario
@@ -28,10 +28,26 @@ class Auth extends Conexion  implements IAuthModel {
      * Valida el formato de la contraseña
      * Requisitos: mínimo 8 caracteres, 1 mayúscula, 1 minúscula, 1 número, 1 carácter especial
      * @param string $password
+     * @param string|null $error_message
      * @return bool
      */
-    public function validarPassword(string $password): bool {
-        return preg_match(self::PASSWORD_PATTERN, $password) === 1;
+    public function validarPassword(string $password, ?string &$error_message = null): bool {
+        $validations = [
+            '/(?=.*[A-Z])/' => 'password_uppercase',
+            '/(?=.*[a-z])/' => 'password_lowercase',
+            '/(?=.*\d)/' => 'password_number',
+            '/(?=.*[!@#$%^&*()_+\-=\[\]{};\':"\\|,.<>\/?])/' => 'password_special',
+            '/.{8,}/' => 'password_min_8_chars'
+        ];
+
+        foreach ($validations as $pattern => $lang_key) {
+            if (!preg_match($pattern, $password)) {
+                $error_message = Lang::get($lang_key);
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
