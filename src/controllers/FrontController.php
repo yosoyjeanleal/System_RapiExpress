@@ -8,13 +8,13 @@ class FrontController
             'controller' => 'langController', 
             'methods' => ['cambiar'], 
             'default' => 'cambiar',
-            'subfolder' => null // Sin subcarpeta
+            'subfolder' => null
         ],
         'auth'     => [
-            'controller' => 'authController', 
+            'controller' => 'AuthController',
             'methods' => ['login', 'recoverPassword', 'logout'], 
             'default' => 'login',
-            'subfolder' => 'auth' // 👈 Dentro de /controllers/auth/
+            'subfolder' => 'Auth'
         ],
         'dashboard'=> [
             'controller' => 'dashboardController', 
@@ -126,38 +126,44 @@ class FrontController
         ],
     ];
 
-    public function handle(string $controller, string $action): void
+    public function handle(string $controllerName, string $action): void
     {
         try {
-            if (!array_key_exists($controller, $this->specialControllers)) {
-                throw new \Exception("Controlador no válido: " . $controller);
+            if (!array_key_exists($controllerName, $this->specialControllers)) {
+                throw new \Exception("Controlador no válido: " . $controllerName);
             }
 
-            $config = $this->specialControllers[$controller];
+            $config = $this->specialControllers[$controllerName];
             $methodToCall = in_array($action, $config['methods']) ? $action : $config['default'];
             
-            // 👇 Construir la ruta según si hay subcarpeta o no
             $subfolder = $config['subfolder'] ?? null;
-            if ($subfolder) {
-                $controllerFile = __DIR__ . "/../controllers/{$subfolder}/{$controller}Controller.php";
-            } else {
-                $controllerFile = __DIR__ . "/../controllers/{$controller}Controller.php";
-            }
-            
-            $functionName = $controller . '_' . $methodToCall;
+            $controllerFile = __DIR__ . ($subfolder ? "/{$subfolder}/" : '/') . $config['controller'] . ".php";
 
-            if (!function_exists($functionName)) {
+            if (!file_exists($controllerFile)) {
+                $controllerFile = __DIR__ . "/../controllers" . ($subfolder ? "/{$subfolder}/" : '/') . $config['controller'] . ".php";
                 if (!file_exists($controllerFile)) {
                     throw new \Exception("Controlador no encontrado: " . $controllerFile);
                 }
-                require_once $controllerFile;
             }
+            require_once $controllerFile;
 
-            if (!function_exists($functionName)) {
-                throw new \Exception("Acción no válida: " . $functionName);
+            $controllerClassName = 'RapiExpress\\Controllers\\' . ($subfolder ? $subfolder . '\\' : '') . $config['controller'];
+
+            if (class_exists($controllerClassName)) {
+                $controllerInstance = new $controllerClassName();
+                if (method_exists($controllerInstance, $methodToCall)) {
+                    $controllerInstance->$methodToCall();
+                } else {
+                    throw new \Exception("Acción no válida: " . $methodToCall);
+                }
+            } else {
+                $functionName = $controllerName . '_' . $methodToCall;
+                if (function_exists($functionName)) {
+                    call_user_func($functionName);
+                } else {
+                    throw new \Exception("Función no encontrada: " . $functionName);
+                }
             }
-
-            call_user_func($functionName);
             
         } catch (\Exception $e) {
             http_response_code(500);

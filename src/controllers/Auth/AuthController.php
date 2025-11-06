@@ -1,129 +1,115 @@
 <?php
 use RapiExpress\Models\Auth;
 use RapiExpress\Helpers\Lang;
+use RapiExpress\Traits\ValidationTrait;
 
-/**
- * Maneja el inicio de sesión
- */
-function auth_login() {
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        handleLoginPost();
-        return;
+class AuthController {
+    use ValidationTrait;
+
+    public function login() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->handleLoginPost();
+            return;
+        }
+
+        include __DIR__ . '/../../views/auth/login.php';
     }
 
-    include __DIR__ . '/../../views/auth/login.php';
-}
+    public function handleLoginPost(): void {
+        $response = ['success' => false, 'message' => '', 'redirect' => ''];
+        $data = $this->sanitize($_POST);
 
-/**
- * Procesa el POST de login
- */
-function handleLoginPost(): void {
-    $response = ['success' => false, 'message' => '', 'redirect' => ''];
+        $rules = [
+            'Username' => 'required|username',
+            'Password' => 'required'
+        ];
+        $errors = $this->validate($data, $rules);
 
-    try {
-        $username = trim($_POST['Username'] ?? '');
-        $password = trim($_POST['Password'] ?? '');
-
-        $authModel = new Auth();
-
-        // Validaciones
-        if (empty($username) || empty($password)) {
-            $response['message'] = Lang::get('complete_all_fields');
-        } elseif (!$authModel->validarUsername($username)) {
-            $response['message'] = Lang::get('invalid_username');
-        } elseif (!$authModel->validarPassword($password, $error)) {
-            $response['message'] = $error;
+        if (!empty($errors)) {
+            $response['message'] = implode(', ', array_merge(...array_values($errors)));
         } else {
-            $usuario = $authModel->autenticar($username, $password);
-            
-            if ($usuario) {
-                // Guardar sesión
-                $_SESSION['ID_Usuario']      = (int)$usuario['ID_Usuario'];
-                $_SESSION['usuario']         = $usuario['Username'];
-                $_SESSION['nombre_completo'] = $usuario['Nombres_Usuario'] . ' ' . $usuario['Apellidos_Usuario'];
-                $_SESSION['ID_Cargo']        = (int)$usuario['ID_Cargo'];
-                $_SESSION['imagen_usuario']  = !empty($usuario['imagen_archivo']) ? $usuario['imagen_archivo'] : 'default.png';
+            try {
+                $authModel = new Auth();
+                $usuario = $authModel->autenticar($data['Username'], $data['Password']);
 
-                $response['success'] = true;
-                $response['message'] = Lang::get('login_success');
-                $response['redirect'] = $_SESSION['ID_Cargo'] === 1 
-                    ? 'index.php?c=dashboard&a=admin' 
-                    : 'index.php?c=dashboard&a=empleado';
-            } else {
-                $response['message'] = Lang::get('invalid_credentials');
+                if ($usuario) {
+                    $_SESSION['ID_Usuario']      = (int)$usuario['ID_Usuario'];
+                    $_SESSION['usuario']         = $usuario['Username'];
+                    $_SESSION['nombre_completo'] = $usuario['Nombres_Usuario'] . ' ' . $usuario['Apellidos_Usuario'];
+                    $_SESSION['ID_Cargo']        = (int)$usuario['ID_Cargo'];
+                    $_SESSION['imagen_usuario']  = !empty($usuario['imagen_archivo']) ? $usuario['imagen_archivo'] : 'default.png';
+
+                    $response['success'] = true;
+                    $response['message'] = Lang::get('login_success');
+                    $response['redirect'] = $_SESSION['ID_Cargo'] === 1
+                        ? 'index.php?c=dashboard&a=admin'
+                        : 'index.php?c=dashboard&a=empleado';
+                } else {
+                    $response['message'] = Lang::get('invalid_credentials');
+                }
+            } catch (Exception $e) {
+                error_log("Error en login: " . $e->getMessage());
+                $response['message'] = Lang::get('system_error');
             }
         }
-    } catch (Exception $e) {
-        error_log("Error en login: " . $e->getMessage());
-        $response['message'] = Lang::get('system_error');
+
+        header('Content-Type: application/json');
+        echo json_encode($response);
+        exit();
     }
 
-    header('Content-Type: application/json');
-    echo json_encode($response);
-    exit();
-}
+    public function recoverPassword() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->handleRecoverPasswordPost();
+            return;
+        }
 
-/**
- * Maneja la recuperación de contraseña
- */
-function auth_recoverPassword() {
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        handleRecoverPasswordPost();
-        return;
+        include __DIR__ . '/../../views/auth/recoverPassword.php';
     }
 
-    include __DIR__ . '/../../views/auth/recoverpassword.php';
-}
+    public function handleRecoverPasswordPost(): void {
+        $response = ['success' => false, 'message' => ''];
+        $data = $this->sanitize($_POST);
 
-/**
- * Procesa el POST de recuperación de contraseña
- */
-function handleRecoverPasswordPost(): void {
-    $response = ['success' => false, 'message' => ''];
+        $rules = [
+            'Username' => 'required|username',
+            'Password' => 'required'
+        ];
+        $errors = $this->validate($data, $rules);
 
-    try {
-        $username = trim($_POST['Username'] ?? '');
-        $newPassword = trim($_POST['Password'] ?? '');
-        $authModel = new Auth();
-
-        // Validaciones
-        if (empty($username) || empty($newPassword)) {
-            $response['message'] = Lang::get('complete_all_fields');
-        } elseif (!$authModel->validarUsername($username)) {
-            $response['message'] = Lang::get('invalid_username');
-        } elseif (!$authModel->validarPassword($newPassword, $error)) {
-            $response['message'] = $error;
+        if (!empty($errors)) {
+            $response['message'] = implode(', ', array_merge(...array_values($errors)));
         } else {
-            if (!$authModel->usuarioExiste($username)) {
-                $response['message'] = Lang::get('user_not_found');
-            } elseif ($authModel->actualizarPassword($username, $newPassword)) {
-                $response['success'] = true;
-                $response['message'] = Lang::get('password_updated_successfully');
-            } else {
-                $response['message'] = Lang::get('error_updating_password');
+            try {
+                $authModel = new Auth();
+                if (!$authModel->usuarioExiste($data['Username'])) {
+                    $response['message'] = Lang::get('user_not_found');
+                } elseif ($authModel->actualizarPassword($data['Username'], $data['Password'])) {
+                    $response['success'] = true;
+                    $response['message'] = Lang::get('password_updated_successfully');
+                } else {
+                    $response['message'] = Lang::get('error_updating_password');
+                }
+            } catch (Exception $e) {
+                error_log("Error en recuperación: " . $e->getMessage());
+                $response['message'] = Lang::get('system_error');
             }
         }
-    } catch (Exception $e) {
-        error_log("Error en recuperación: " . $e->getMessage());
-        $response['message'] = Lang::get('system_error');
+
+        header('Content-Type: application/json');
+        echo json_encode($response);
+        exit();
     }
 
-    header('Content-Type: application/json');
-    echo json_encode($response);
-    exit();
-}
+    public function logout(): void {
+        session_unset();
+        session_destroy();
 
-/**
- * Cierra la sesión del usuario
- */
-function auth_logout(): void {
-    session_unset();
-    session_destroy();
-    
-    if (ob_get_level()) {
-        ob_end_clean();
+        if (ob_get_level()) {
+            ob_end_clean();
+        }
+
+        header('Location: index.php?c=auth&a=login', true, 302);
+        exit();
     }
-    
-    header('Location: index.php?c=auth&a=login', true, 302);
-    exit();
 }

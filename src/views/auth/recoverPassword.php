@@ -169,6 +169,9 @@ use RapiExpress\Helpers\Lang;
 <script src="assets/Temple/vendors/scripts/layout-settings.js"></script>
 <script src="assets/Temple/src/plugins/sweetalert2/sweetalert2.js"></script>
 <script src="assets/js/Helpers/validation.js"></script>
+<script src="assets/js/ajax_utils.js"></script>
+<script src="assets/js/Helpers/formValidator.js"></script>
+<script src="assets/js/Helpers/notification.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -227,73 +230,54 @@ document.addEventListener('DOMContentLoaded', function() {
         return allValid;
     }
 
-    // Envío del formulario
+    const fields = [
+        { name: 'Username', rules: ['notEmpty', 'username'] },
+        { name: 'Password', rules: ['notEmpty'] }
+    ];
+
+    const validator = new FormValidator(form, fields);
+
     form.addEventListener('submit', function(e) {
         e.preventDefault();
+        if (validator.validate()) {
+            const password = passwordInput.value;
+            const isValid = updateValidationUI(password);
 
-        const password = passwordInput.value;
-        const isValid = updateValidationUI(password);
+            if (!isValid) {
+                validationContainer.classList.add('show', 'shake');
+                setTimeout(() => validationContainer.classList.remove('shake'), 500);
 
-        if (!isValid) {
-            validationContainer.classList.add('show', 'shake');
-            setTimeout(() => validationContainer.classList.remove('shake'), 500);
-
-            Swal.fire({
-                icon: 'warning',
-                title: '<?= Lang::get("invalid_password") ?>',
-                text: '<?= Lang::get("password_requirements_message") ?>',
-                confirmButtonColor: '#f39c12'
-            });
-            return;
-        }
-
-        // Deshabilitar botón
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> <?= Lang::get("processing") ?>';
-
-        // Enviar con AJAX
-        const formData = new FormData(form);
-
-        fetch('index.php?c=auth&a=recoverPassword', {
-            method: 'POST',
-            body: formData,
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                Swal.fire({
-                    icon: 'success',
-                    title: '<?= Lang::get("success") ?>',
-                    text: data.message,
-                    confirmButtonColor: '#3085d6'
-                }).then(() => {
-                    window.location.href = 'index.php?c=auth&a=login';
-                });
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: '<?= Lang::get("error") ?>',
-                    text: data.message,
-                    confirmButtonColor: '#d33'
-                });
-                
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<?= Lang::get("reset_password") ?>';
+                Notification.error('<?= Lang::get("invalid_password") ?>', '<?= Lang::get("password_requirements_message") ?>');
+                return;
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            Swal.fire({
-                icon: 'error',
-                title: '<?= Lang::get("connection_error") ?>',
-                text: '<?= Lang::get("check_connection") ?>',
-                confirmButtonColor: '#d33'
-            });
-            
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<?= Lang::get("reset_password") ?>';
-        });
+
+            // Deshabilitar botón
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> <?= Lang::get("processing") ?>';
+
+            // Enviar con AJAX
+            const formData = new FormData(form);
+
+            sendRequest('index.php?c=auth&a=recoverPassword', 'POST', formData)
+                .then(data => {
+                    if (data.success) {
+                        Notification.success('<?= Lang::get("success") ?>', data.message)
+                            .then(() => {
+                                window.location.href = 'index.php?c=auth&a=login';
+                            });
+                    } else {
+                        Notification.error('<?= Lang::get("error") ?>', data.message);
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<?= Lang::get("reset_password") ?>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Notification.error('<?= Lang::get("connection_error") ?>', '<?= Lang::get("check_connection") ?>');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<?= Lang::get("reset_password") ?>';
+                });
+        }
     });
 });
 </script>

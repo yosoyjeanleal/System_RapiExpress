@@ -566,3 +566,36 @@ window.AjaxUtils = {
 };
 
 console.log('✅ ajax_utils.js cargado correctamente');
+
+/**
+ * Realiza una petición fetch a la URL especificada.
+ *
+ * @param {string} url - La URL a la que se enviará la petición.
+ * @param {string} method - El método HTTP (e.g., 'POST', 'GET').
+ * @param {FormData|object} body - El cuerpo de la petición.
+ * @returns {Promise<any>} - Una promesa que se resuelve con los datos de la respuesta.
+ * @throws {Error} - Lanza un error si la petición falla.
+ */
+async function sendRequest(url, method = 'POST', body) {
+    const options = {
+        method: method,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    };
+
+    if (body) {
+        options.body = body;
+    }
+
+    try {
+        const response = await fetch(url, options);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Fetch Error:', error);
+        throw error;
+    }
+}
