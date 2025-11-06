@@ -101,6 +101,10 @@ use RapiExpress\Helpers\Lang;
 <script src="assets/Temple/vendors/scripts/script.min.js"></script>
 <script src="assets/Temple/vendors/scripts/layout-settings.js"></script>
 <script src="assets/Temple/src/plugins/sweetalert2/sweetalert2.js"></script>
+<script src="assets/js/Helpers/validation.js"></script>
+<script src="assets/js/ajax_utils.js"></script>
+<script src="assets/js/Helpers/formValidator.js"></script>
+<script src="assets/js/Helpers/notification.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -119,59 +123,42 @@ document.addEventListener('DOMContentLoaded', function() {
         toggleIcon.classList.toggle('fa-eye-slash');
     });
 
-    // Envío del formulario
+    const fields = [
+        { name: 'Username', rules: ['notEmpty', 'username'] },
+        { name: 'Password', rules: ['notEmpty'] }
+    ];
+
+    const validator = new FormValidator(form, fields);
+
     form.addEventListener('submit', function(e) {
         e.preventDefault();
+        if (validator.validate()) {
+            // Deshabilitar botón
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> <?= Lang::get("processing") ?>';
 
-        // Deshabilitar botón
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> <?= Lang::get("processing") ?>';
+            const formData = new FormData(form);
 
-        const formData = new FormData(form);
-
-        fetch('index.php?c=auth&a=login', {
-            method: 'POST',
-            body: formData,
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                Swal.fire({
-                    icon: 'success',
-                    title: '<?= Lang::get("welcome") ?>',
-                    text: data.message,
-                    timer: 1500,
-                    showConfirmButton: false,
-                    allowOutsideClick: false
-                }).then(() => window.location.href = data.redirect);
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: '<?= Lang::get("error") ?>',
-                    text: data.message,
-                    showConfirmButton: false,
-                    timer: 2000,
-                    timerProgressBar: true
+            sendRequest('index.php?c=auth&a=login', 'POST', formData)
+                .then(data => {
+                    if (data.success) {
+                        Notification.success('<?= Lang::get("welcome") ?>', data.message)
+                            .then(() => window.location.href = data.redirect);
+                    } else {
+                        Notification.error('<?= Lang::get("error") ?>', data.message);
+                        passwordInput.value = '';
+                        passwordInput.focus();
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<?= Lang::get("enter") ?>';
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    Notification.error('<?= Lang::get("error") ?>', '<?= Lang::get("unexpected_error") ?>');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<?= Lang::get("enter") ?>';
                 });
-                passwordInput.value = '';
-                passwordInput.focus();
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<?= Lang::get("enter") ?>';
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            Swal.fire({
-                icon: 'error',
-                title: '<?= Lang::get("error") ?>',
-                text: '<?= Lang::get("unexpected_error") ?>',
-                showConfirmButton: false,
-                timer: 2000
-            });
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<?= Lang::get("enter") ?>';
-        });
+        }
     });
 });
 </script>
