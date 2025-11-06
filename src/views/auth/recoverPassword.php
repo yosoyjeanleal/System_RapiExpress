@@ -168,6 +168,7 @@ use RapiExpress\Helpers\Lang;
 <script src="assets/Temple/vendors/scripts/script.min.js"></script>
 <script src="assets/Temple/vendors/scripts/layout-settings.js"></script>
 <script src="assets/Temple/src/plugins/sweetalert2/sweetalert2.js"></script>
+<script src="assets/js/Helpers/validation.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -201,39 +202,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Validar en tiempo real
     passwordInput.addEventListener('input', function() {
-        validatePassword(this.value);
+        updateValidationUI(this.value);
     });
 
-    // Función de validación
-    function validatePassword(password) {
-        const requirements = {
-            length: password.length >= 8,
-            uppercase: /[A-Z]/.test(password),
-            lowercase: /[a-z]/.test(password),
-            number: /[0-9]/.test(password),
-            special: /[@$!%*#?&]/.test(password)
-        };
-
+    function updateValidationUI(password) {
+        const requirements = validatePassword(password);
         let allValid = true;
 
-        Object.keys(requirements).forEach(req => {
+        for (const req in requirements) {
             const item = validationContainer.querySelector(`[data-requirement="${req}"]`);
             const icon = item.querySelector('i');
             
             if (requirements[req]) {
                 item.classList.remove('invalid');
                 item.classList.add('valid');
-                icon.classList.remove('fa-circle-xmark');
-                icon.classList.add('fa-circle-check');
+                icon.className = 'fa fa-circle-check';
             } else {
                 item.classList.remove('valid');
                 item.classList.add('invalid');
-                icon.classList.remove('fa-circle-check');
-                icon.classList.add('fa-circle-xmark');
+                icon.className = 'fa fa-circle-xmark';
                 allValid = false;
             }
-        });
-
+        }
         return allValid;
     }
 
@@ -242,7 +232,7 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
 
         const password = passwordInput.value;
-        const isValid = validatePassword(password);
+        const isValid = updateValidationUI(password);
 
         if (!isValid) {
             validationContainer.classList.add('show', 'shake');
