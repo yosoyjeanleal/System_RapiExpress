@@ -1,0 +1,25 @@
+{
+    "name": "personal/rapiexpress",
+    "description": "Sistema de Gestión de Paquetes",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Grupo de Proyecto"
+        }
+    ],
+    "require": {
+        "twbs/bootstrap": "^5.3",
+        "endroid/qr-code": "^6.0",
+        "tecnickcom/tcpdf": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "RapiExpress\\": "src/",
+            "RapiExpress\\Config\\": "config/"
+            
+        }       
+        
+    }
+    
+}

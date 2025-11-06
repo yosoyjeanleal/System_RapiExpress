@@ -1,0 +1,18 @@
+.table-actions {
+    display: flex;
+    
+    gap: 8px;
+}
+
+.table-actions a, 
+.table-actions button {
+    font-size: 18px;
+    transition: 0.3s;
+    border: none;
+    background: none;
+}
+
+.table-actions a:hover i,
+.table-actions button:hover i {
+    transform: scale(1.2);
+}

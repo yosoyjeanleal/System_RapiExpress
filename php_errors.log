@@ -1,0 +1,38 @@
+[04-Nov-2025 16:52:57 Europe/Berlin] === Ejecutando dashboard_index ===
+[04-Nov-2025 16:52:57 Europe/Berlin] Usuario es admin, mostrando dashboard admin
+[04-Nov-2025 16:52:57 Europe/Berlin] === Ejecutando dashboard_admin ===
+[04-Nov-2025 16:52:57 Europe/Berlin] Total usuarios obtenidos: 3
+[04-Nov-2025 16:52:57 Europe/Berlin] Total clientes obtenidos: 4
+[04-Nov-2025 16:52:57 Europe/Berlin] Total tiendas obtenidas: 4
+[04-Nov-2025 16:52:57 Europe/Berlin] Total cargos obtenidos: 2
+[04-Nov-2025 16:52:57 Europe/Berlin] Total couriers obtenidos: 5
+[04-Nov-2025 16:52:57 Europe/Berlin] Mostrando vista dashboard admin
+[04-Nov-2025 16:52:57 Europe/Berlin] PHP Deprecated:  htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated in C:\xampp\htdocs\RapiExpress\src\views\dashboard\dashboard.php on line 84
+[04-Nov-2025 16:53:10 Europe/Berlin] === Ejecutando dashboard_index ===
+[04-Nov-2025 16:53:10 Europe/Berlin] No hay sesión activa, redirigiendo a login
+[04-Nov-2025 16:53:24 Europe/Berlin] === Ejecutando dashboard_admin ===
+[04-Nov-2025 16:53:24 Europe/Berlin] Total usuarios obtenidos: 3
+[04-Nov-2025 16:53:24 Europe/Berlin] Total clientes obtenidos: 4
+[04-Nov-2025 16:53:24 Europe/Berlin] Total tiendas obtenidas: 4
+[04-Nov-2025 16:53:24 Europe/Berlin] Total cargos obtenidos: 2
+[04-Nov-2025 16:53:24 Europe/Berlin] Total couriers obtenidos: 5
+[04-Nov-2025 16:53:24 Europe/Berlin] Mostrando vista dashboard admin
+[04-Nov-2025 16:53:24 Europe/Berlin] PHP Deprecated:  htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated in C:\xampp\htdocs\RapiExpress\src\views\dashboard\dashboard.php on line 84
+[04-Nov-2025 16:54:17 Europe/Berlin] === Ejecutando dashboard_index ===
+[04-Nov-2025 16:54:17 Europe/Berlin] Usuario es admin, mostrando dashboard admin
+[04-Nov-2025 16:54:17 Europe/Berlin] === Ejecutando dashboard_admin ===
+[04-Nov-2025 16:54:17 Europe/Berlin] Total usuarios obtenidos: 3
+[04-Nov-2025 16:54:17 Europe/Berlin] Total clientes obtenidos: 4
+[04-Nov-2025 16:54:17 Europe/Berlin] Total tiendas obtenidas: 4
+[04-Nov-2025 16:54:17 Europe/Berlin] Total cargos obtenidos: 2
+[04-Nov-2025 16:54:17 Europe/Berlin] Total couriers obtenidos: 5
+[04-Nov-2025 16:54:17 Europe/Berlin] Mostrando vista dashboard admin
+[04-Nov-2025 16:54:17 Europe/Berlin] PHP Deprecated:  htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated in C:\xampp\htdocs\RapiExpress\src\views\dashboard\dashboard.php on line 84
+[04-Nov-2025 16:54:46 Europe/Berlin] === Ejecutando dashboard_admin ===
+[04-Nov-2025 16:54:46 Europe/Berlin] Total usuarios obtenidos: 3
+[04-Nov-2025 16:54:46 Europe/Berlin] Total clientes obtenidos: 4
+[04-Nov-2025 16:54:46 Europe/Berlin] Total tiendas obtenidas: 4
+[04-Nov-2025 16:54:46 Europe/Berlin] Total cargos obtenidos: 2
+[04-Nov-2025 16:54:46 Europe/Berlin] Total couriers obtenidos: 5
+[04-Nov-2025 16:54:46 Europe/Berlin] Mostrando vista dashboard admin
+[04-Nov-2025 16:54:46 Europe/Berlin] PHP Deprecated:  htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated in C:\xampp\htdocs\RapiExpress\src\views\dashboard\dashboard.php on line 84
