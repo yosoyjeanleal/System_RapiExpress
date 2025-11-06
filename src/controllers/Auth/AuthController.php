@@ -31,8 +31,8 @@ function handleLoginPost(): void {
             $response['message'] = Lang::get('complete_all_fields');
         } elseif (!$authModel->validarUsername($username)) {
             $response['message'] = Lang::get('invalid_username');
-        } elseif (!$authModel->validarPassword($password)) {
-            $response['message'] = Lang::get('invalid_password_format');
+        } elseif (!$authModel->validarPassword($password, $error)) {
+            $response['message'] = $error;
         } else {
             $usuario = $authModel->autenticar($username, $password);
             
@@ -91,8 +91,8 @@ function handleRecoverPasswordPost(): void {
             $response['message'] = Lang::get('complete_all_fields');
         } elseif (!$authModel->validarUsername($username)) {
             $response['message'] = Lang::get('invalid_username');
-        } elseif (!$authModel->validarPassword($newPassword)) {
-            $response['message'] = Lang::get('invalid_password_format');
+        } elseif (!$authModel->validarPassword($newPassword, $error)) {
+            $response['message'] = $error;
         } else {
             if (!$authModel->usuarioExiste($username)) {
                 $response['message'] = Lang::get('user_not_found');
