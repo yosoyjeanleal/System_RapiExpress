@@ -101,6 +101,7 @@ use RapiExpress\Helpers\Lang;
 <script src="assets/Temple/vendors/scripts/script.min.js"></script>
 <script src="assets/Temple/vendors/scripts/layout-settings.js"></script>
 <script src="assets/Temple/src/plugins/sweetalert2/sweetalert2.js"></script>
+<script src="assets/js/Helpers/validation.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -121,6 +122,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Envío del formulario
     form.addEventListener('submit', function(e) {
+        const password = passwordInput.value;
+        const requirements = validatePassword(password);
+        const isValid = Object.values(requirements).every(v => v);
+
+        if (!isValid) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'warning',
+                title: 'Contraseña inválida',
+                text: 'Por favor, asegúrate de que la contraseña cumpla con todos los requisitos de seguridad.',
+                confirmButtonColor: '#f39c12'
+            });
+            return;
+        }
         e.preventDefault();
 
         // Deshabilitar botón
